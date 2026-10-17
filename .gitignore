@@ -1,0 +1,76 @@
+# Compiled Objects, Architecture-specific files, and Libraries
+*.o
+*.obj
+*.elf
+*.so
+*.so.*
+*.dylib
+*.dll
+*.lib
+*.a
+*.la
+*.lai
+*.out
+*.exe
+*.app
+
+# Build & Output Directories (CMake, Meson, Make, etc.)
+build/
+
+# Precompiled Headers & Debugger Files
+*.gch
+*.pch
+*.dwo
+*.pdb
+*.ilk
+*.idb
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# CLion / JetBrains
+.idea/
+cmake-build-*/
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.user
+*.ncb
+*.sdf
+*.opensdf
+*.opendb
+ipch/
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+
+# Operating System & Temporary Files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.swp
+.cache/
+compile_flags.txt
+compile_commands.json
+*.env
+
+# Python
+__pycache__/
+
+# BuildSystem
+pycraft/
+source/glad.c
+vendor/glad/
+vendor/GLFW/
+vendor/KHR/

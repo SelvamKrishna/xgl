@@ -1,0 +1,6 @@
+[submodule "vendor/zen-log"]
+	path = vendor/zen-log
+	url = https://github.com/SelvamKrishna/zen-log.git
+[submodule "vendor/zen-math"]
+	path = vendor/zen-math
+	url = https://github.com/SelvamKrishna/zen-math.git
