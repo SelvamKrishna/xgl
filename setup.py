@@ -13,7 +13,7 @@ pycraft.init()
 
 assert pycraft.verify_cmd("cmake", True)  # https://cmake.org/download/
 assert pycraft.verify_cmd("make", True)  # https://www.msys2.org/#installation
-assert pycraft.verify_cmd("glad", True)  # py -m pip install glad
+assert pycraft.verify_cmd("glad", True)  # python -m pip install glad
 
 
 @dataclass(frozen=True)
@@ -27,43 +27,30 @@ class Paths:
 PATHS = Paths()
 
 
-def _cmake_glfw(source_dir: Path, build_dir: Path) -> None:
-    pycraft.run_cmd(
-        [
-            "cmake",
-            "-S",
-            str(source_dir),
-            "-B",
-            str(build_dir),
-            "-G",
-            "MinGW Makefiles",
-            "-DGLFW_BUILD_EXAMPLES=OFF",
-            "-DGLFW_BUILD_TESTS=OFF",
-            "-DGLFW_BUILD_DOCS=OFF",
-        ]
-    )
-    pycraft.run_cmd(f"make -C {build_dir}")
-
-
 def glfw_package_setup() -> None:
-    output_lib = PATHS.build / "libglfw3.a"
-    if output_lib.exists():
+    if (PATHS.build / "libglfw3.a").exists():
         return
 
-    temp_dir = PATHS.build / "temp" / "glfw"
-    extract_dir = temp_dir / "build"
+    if not (PATHS.build / "glfw").exists():
+        pycraft.run_cmd(
+            [
+                "cmake",
+                "-S",
+                str(PATHS.vendor / "glfw"),
+                "-B",
+                str(PATHS.build / "glfw"),
+                "-G",
+                "MinGW Makefiles",
+                "-DGLFW_BUILD_EXAMPLES=OFF",
+                "-DGLFW_BUILD_TESTS=OFF",
+                "-DGLFW_BUILD_DOCS=OFF",
+            ]
+        )
 
-    pycraft.remove_path(temp_dir)
+    if not (PATHS.build / "glfw" / "src" / "libglfw3.a").exists():
+        pycraft.run_cmd(f"make -C {PATHS.build / 'glfw'}")
 
-    pycraft.package.ArchivePackage(
-        extract_dir,
-        "https://github.com/glfw/glfw/releases/download/3.5.1/glfw-3.5.1.zip",
-    ).install()
-
-    pycraft.copy_path(extract_dir / "include" / "GLFW", PATHS.vendor / "GLFW")
-    _cmake_glfw(extract_dir, temp_dir)
-    pycraft.copy_path(temp_dir / "src" / "libglfw3.a", output_lib)
-
+    pycraft.copy_path(PATHS.build / 'glfw' / "src" / "libglfw3.a", PATHS.build / "libglfw3.a")
 
 def glad_package_setup() -> None:
     output_c = PATHS.source / "glad.c"
@@ -77,7 +64,7 @@ def glad_package_setup() -> None:
 
     pycraft.package.CustomPackage(
         temp_dir,
-        f"py -m glad --profile=core --api=gl=4.6 --generator=c --out-path {temp_dir}",
+        f"python -m glad --profile=core --api=gl=4.6 --generator=c --out-path {temp_dir}",
     ).install()
 
     pycraft.copy_path(temp_dir / "include" / "glad", PATHS.vendor / "glad")

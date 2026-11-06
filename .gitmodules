@@ -4,3 +4,9 @@
 [submodule "vendor/zen-math"]
 	path = vendor/zen-math
 	url = https://github.com/SelvamKrishna/zen-math.git
+[submodule "vendor/glfw"]
+	path = vendor/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "pycraft"]
+	path = pycraft
+	url = https://github.com/SelvamKrishna/pycraft

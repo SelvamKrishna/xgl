@@ -21,7 +21,7 @@ FLAGS = pycraft.config.CompileFlags(
         WORKING_DIR,
         WORKING_DIR / "include",
         VENDOR_DIR,
-        VENDOR_DIR / "glfw3" / "include",
+        VENDOR_DIR / "glfw" / "include",
         VENDOR_DIR / "glad" / "include",
         VENDOR_DIR / "zen-log" / "include",
         VENDOR_DIR / "zen-math" / "include",

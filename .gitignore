@@ -68,9 +68,7 @@ compile_commands.json
 # Python
 __pycache__/
 
-# BuildSystem
-pycraft/
+# Build Artifacts
 source/glad.c
 vendor/glad/
-vendor/GLFW/
 vendor/KHR/
