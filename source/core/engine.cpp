@@ -34,15 +34,8 @@ namespace xgl::core {
     void Engine::Quit() noexcept
     {
         Engine& inst {XGL_INST};
-
-        switch (inst._state)
-        {
-            case State::Awake:       break;
-            case State::Initialized: glfwTerminate();
-            case State::Running:     glfwTerminate();
-            case State::Shutdown:    break;
-        };
-
+        if (inst._state == State::Initialized || inst._state == State::Running)
+            glfwTerminate();
         inst._state = Engine::State::Shutdown;
     }
 

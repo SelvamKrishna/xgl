@@ -1,4 +1,5 @@
 #include "core/engine.hpp"
+#include "core/window.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -23,22 +24,21 @@ const char* FS_SRC {
     "}\n"
 };
 
+using namespace xgl;
+using namespace xgl::core;
+using namespace xgl::config;
+
 void _FramebufferSizeCallback(GLFWwindow* _, int width, int height) { glViewport(0, 0, width, height); }
 
 int main()
 {
     zen::logger::init();
-    xgl::core::Engine::Init({3, 3});
+    Engine::Init(Version {4, 6});
 
-    GLFWwindow* window {glfwCreateWindow(800, 600, "Hello Triangle", NULL, NULL)};
-    if (window == NULL)
-    {
-        std::cerr << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, _FramebufferSizeCallback);
+    Window window {WindowBuilder{}.WithTitle("Hello").Build()};
+
+    glfwMakeContextCurrent(window.GetWindowPtr());
+    glfwSetFramebufferSizeCallback(window.GetWindowPtr(), _FramebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -83,7 +83,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window.GetWindowPtr()))
     {
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -92,7 +92,7 @@ int main()
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(window.GetWindowPtr());
         glfwPollEvents();
     }
 
