@@ -6,8 +6,8 @@
 
 namespace xgl::internal {
 
-    void AcquireGlfw(config::Version version);
-    void ReleaseGlfw();
+    void AcquireGLFW(config::Version version);
+    void ReleaseGLFW();
     void LoadGlad();
 
 } // namespace xgl::internal
@@ -16,8 +16,8 @@ namespace xgl {
 
     struct EngineGuard {
     public:
-        explicit EngineGuard(config::Version glVersion = {4, 6});
-        ~EngineGuard();
+        explicit EngineGuard(config::Version glVersion = {4, 6}){ internal::AcquireGLFW(glVersion); }
+        ~EngineGuard() { internal::ReleaseGLFW(); }
 
         EngineGuard(const EngineGuard&)            = delete;
         EngineGuard& operator=(const EngineGuard&) = delete;

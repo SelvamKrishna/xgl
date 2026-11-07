@@ -26,6 +26,7 @@ namespace xgl::config {
 
     inline constexpr Version  VERSION  { 0, 1 }; // `xgl` Version
     inline const zen::log_tag XGL_TAG { "XGL", zen::ansi_color::MAGENTA };
+    inline const zen::log_tag GLFW_TAG { "GLFW", zen::ansi_color::MAGENTA, &XGL_TAG };
 
 } // namespace xgl::config
 

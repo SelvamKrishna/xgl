@@ -7,24 +7,18 @@ namespace xgl {
 
     struct ScopedDepthTest {
     public:
-        explicit ScopedDepthTest(bool enabled);
-
-        ~ScopedDepthTest();
+        explicit ScopedDepthTest(bool isEnabled);
     };
 
     struct ScopedBlend {
     public:
-        explicit ScopedBlend(bool enabled);
-        ScopedBlend(GLint src, GLint dst);
-
-        ~ScopedBlend();
+        explicit ScopedBlend(bool isEnabled);
+        ScopedBlend(GLint source, GLint destination);
     };
 
     struct ScopedViewport {
     public:
-        ScopedViewport(int x, int y, int w, int h);
-
-        ~ScopedViewport();
+        ScopedViewport(int x, int y, int width, int height);
     };
 
 } // namespace xgl

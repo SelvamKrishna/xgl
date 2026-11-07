@@ -17,15 +17,16 @@ namespace xgl {
         size_t    offset;
     };
 
-    struct VertexArray : public internal::GlObject<VertexArray> {
+    struct VertexArray : public internal::IGLObject<VertexArray> {
     public:
-        VertexArray();
+        VertexArray() { this->IAllocate(); }
+
+        void IAllocate();
+        static void IDelete(GLuint handle) noexcept { glDeleteVertexArrays(1, &handle); }
 
         void SetVertexBuffer(const VertexBuffer& vbo, std::span<const VertexAttrib> attribs);
         void SetIndexBuffer(const IndexBuffer& ibo);
         void Bind() const noexcept;
-
-        static void Delete(GLuint handle) noexcept { glDeleteVertexArrays(1, &handle); }
     };
 
 } // namespace xgl

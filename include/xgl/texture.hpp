@@ -13,7 +13,7 @@ namespace xgl {
     enum struct Filter        : GLint  { Nearest = GL_NEAREST, Linear = GL_LINEAR, LinearMipmapLinear = GL_LINEAR_MIPMAP_LINEAR };
     enum struct Wrap          : GLint  { Repeat = GL_REPEAT, ClampToEdge = GL_CLAMP_TO_EDGE };
 
-    struct Texture2D : public internal::GlObject<Texture2D> {
+    struct Texture2D : public internal::IGLObject<Texture2D> {
     public:
         Texture2D(
             uint32_t width,
@@ -26,13 +26,14 @@ namespace xgl {
 
         ~Texture2D() = default;
 
+        void IAllocate();
+        static void IDelete(GLuint handle) noexcept { glDeleteTextures(1, &handle); }
+
         void Bind(GLuint unit = 0) const noexcept;
         void SetFilter(Filter min, Filter mag);
         void SetWrap(Wrap s, Wrap t);
         void GenerateMipmaps();
         void Update(const void* data, uint32_t width, uint32_t height);
-
-        static void Delete(GLuint handle) noexcept { glDeleteTextures(1, &handle); }
     };
 
 } // namespace xgl

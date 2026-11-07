@@ -69,6 +69,7 @@ compile_commands.json
 __pycache__/
 
 # Build Artifacts
+ignore/
 source/glad.c
 vendor/glad/
 vendor/KHR/

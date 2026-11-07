@@ -39,19 +39,27 @@ namespace xgl {
         constexpr Window(const Window&)            noexcept = delete;
         constexpr Window& operator=(const Window&) noexcept = delete;
 
-        constexpr Window(Window&&) noexcept;
-        constexpr Window& operator=(Window&&) noexcept;
+        Window(Window&&) noexcept;
+        Window& operator=(Window&&) noexcept;
 
         void MakeCurrent();
         [[nodiscard]] WeakContext Context()      const noexcept { return this->_contextPtr; }
         [[nodiscard]] GLFWwindow* NativeHandle() const noexcept { return this->_windowPtr; }
 
-        [[nodiscard]] bool ShouldClose() const noexcept;
-        void PollEvents() const noexcept;
-        void SwapBuffers() const noexcept;
-        void RequestClose() noexcept;
+        [[nodiscard]] bool ShouldClose() const noexcept
+        {
+            return this->_windowPtr ? glfwWindowShouldClose(this->_windowPtr) : true;
+        }
 
-        void SetVSync(bool enabled) noexcept;
+        void PollEvents() const noexcept { glfwPollEvents(); }
+        void SwapBuffers() const noexcept { if (this->_windowPtr) glfwSwapBuffers(this->_windowPtr); }
+        void RequestClose() noexcept
+        {
+            if (this->_windowPtr) glfwSetWindowShouldClose(this->_windowPtr, GLFW_TRUE);
+        }
+
+        void SetVSync(bool enabled) noexcept { glfwSwapInterval(enabled ? 1 : 0); }
+
         [[nodiscard]] std::pair<int32_t, int32_t> FramebufferSize() const noexcept;
 
         // void OnFramebufferSize(std::function<void(int,int)>);

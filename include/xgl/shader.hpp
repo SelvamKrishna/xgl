@@ -5,49 +5,36 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <filesystem>
 
 namespace xgl {
 
-    struct ShaderCompileError : public std::runtime_error {
+    struct Shader : public internal::IGLObject<Shader> {
+    public:
+        enum Kind : GLenum {
+            Vertex   = GL_VERTEX_SHADER,
+            Fragment = GL_FRAGMENT_SHADER,
+            Geometry = GL_GEOMETRY_SHADER,
+            Compute  = GL_COMPUTE_SHADER,
+        };
+
     private:
-        std::string _log;
+        Kind _type;
+
+        static std::string _ReadFile(const std::filesystem::path& path);
 
     public:
-        ShaderCompileError(GLuint shaderHandle, std::string log);
-        [[nodiscard]] const std::string& Log() const noexcept;
+        Shader(Shader::Kind type, std::filesystem::path sourceFile);
+
+        void IAllocate();
+        static void IDelete(Handle handle) noexcept;
+
+        [[nodiscard]] constexpr Kind Type() const noexcept { return this->_type; }
     };
 
-    struct ShaderLinkError : public std::runtime_error {
-    private:
-        std::string _log;
-
-    public:
-        ShaderLinkError(GLuint shaderHandle, std::string log);
-        [[nodiscard]] const std::string& Log() const noexcept;
-    };
-
-    enum struct ShaderType : GLenum {
-        Vertex   = GL_VERTEX_SHADER,
-        Fragment = GL_FRAGMENT_SHADER,
-        Geometry = GL_GEOMETRY_SHADER,
-        Compute  = GL_COMPUTE_SHADER,
-    };
-
-    struct Shader : public internal::GlObject<Shader> {
-    private:
-        ShaderType _type;
-
-    public:
-        Shader(ShaderType type, std::string_view source);
-
-        [[nodiscard]] ShaderType Type() const noexcept;
-        static void Delete(GLuint handle) noexcept;
-    };
-
-    struct ShaderProgram : public internal::GlObject<ShaderProgram> {
+    struct ShaderProgram : public internal::IGLObject<ShaderProgram> {
     private:
         std::unordered_map<std::string, GLint> _uniformCache; // populated lazily
 
@@ -55,14 +42,21 @@ namespace xgl {
         ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader);
         ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader, Shader&& geometryShader);
 
+        void IAllocate();
+        static void IDelete(Handle handle) noexcept;
+
         void Bind() const noexcept;
+        [[nodiscard]] GLint UniformLocation(std::string_view name);
 
-        void SetUniform(std::string_view name, float) noexcept;
-        void SetUniform(std::string_view name, int)   noexcept;
+        void SetUniform(std::string_view name, float value) noexcept
+        {
+            glUniform1f(this->UniformLocation(name), value);
+        }
 
-        [[nodiscard]] GLint UniformLocation(std::string_view name) noexcept;
-
-        static void Delete(GLuint handle) noexcept;
+        void SetUniform(std::string_view name, int value) noexcept
+        {
+            glUniform1i(this->UniformLocation(name), value);
+        }
     };
 
 } // namespace xgl
