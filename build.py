@@ -27,7 +27,8 @@ FLAGS = pycraft.config.CompileFlags(
         VENDOR_DIR / "zen-math" / "include",
     ),
     lib_dirs=(BUILD_DIR,),
-    libraries=("glfw3", "gdi32", "opengl32"),
+    libraries=("glfw3", "opengl32"),
+    defines=( "GLFW_DLL", )
 )
 
 PROJ_CFG = pycraft.config.ProjectConfig(flags=FLAGS)
@@ -38,6 +39,9 @@ if __name__ == "__main__":
     FLAGS.generate_compile_flags(Path("compile_flags.txt"))
 
     out_path = pycraft.Builder(PROJ_CFG, BUILD_CFG).build()
+
+    if not (out_path.parent / "glfw3.dll").exists():
+        pycraft.copy_path(BUILD_DIR / "glfw3.dll", out_path.parent / "glfw3.dll")
 
     if BUILD_CFG.should_run():
         pycraft.run_project(out_path)

@@ -9,17 +9,18 @@
 
 namespace xgl::internal {
 
-    template <class Derived, class GLHandle = GLuint> class IGLObject {
+    template <class Derived, class GLHandle = GLuint>
+    class IGLObject {
     private:
         void _Destroy() noexcept
         {
             if (this->_handle == 0) return;
-            const std::shared_ptr<Window::ContextState> CTX {this->_ctx.lock()};
 
+            const std::shared_ptr<Window::ContextState> CTX { this->_ctx.lock() };
             if (CTX && CTX->alive)
                 Derived::IDelete(this->_handle);
 
-            this->_handle = { 0 };
+            this->_handle = 0;
         }
 
     protected:
@@ -27,6 +28,8 @@ namespace xgl::internal {
 
         Handle              _handle { 0 };
         Window::WeakContext _ctx    { };
+
+        explicit IGLObject(Window::WeakContext ctx) noexcept : _ctx { std::move(ctx) } {}
 
         static void IDelete(Handle handle) noexcept; // Implement GL destruction logic
         void IAllocate();                            // Implement GL creation logic
@@ -39,41 +42,42 @@ namespace xgl::internal {
                 !CTX || !CTX->alive,
                 {
                     "Attempted to use an OpenGL object `{}` without a valid context.",
-                    typeid(Derived).name()
+                    zen::_get_type<Derived>()
                 },
                 &config::GLFW_TAG
             );
         }
 
-        void Adopt(Handle newHandle) noexcept { this->_handle = newHandle; }
+        void Adopt(Handle newHandle) noexcept
+        {
+            zen::panic_if(this->_handle != 0, "Adopt() called on a live handle", &config::GLFW_TAG);
+            this->_handle = newHandle;
+        }
 
     public:
-        IGLObject() = default;
-
-        constexpr IGLObject(IGLObject&& other) noexcept
+        IGLObject(IGLObject&& other) noexcept
             : _handle { std::exchange(other._handle, 0) }
             , _ctx    { std::move(other._ctx) }
         {}
 
-        constexpr IGLObject &operator=(IGLObject&& other) noexcept
+        IGLObject& operator=(IGLObject&& other) noexcept
         {
             if (this != &other)
             {
                 this->_Destroy();
                 this->_handle = std::exchange(other._handle, 0);
-                this->_ctx = std::move(other._ctx);
+                this->_ctx    = std::move(other._ctx);
             }
-
             return *this;
         }
 
-        constexpr IGLObject(const IGLObject &)            noexcept = delete;
-        constexpr IGLObject &operator=(const IGLObject &) noexcept = delete;
+        IGLObject(const IGLObject&)            = delete;
+        IGLObject& operator=(const IGLObject&) = delete;
 
         ~IGLObject() { this->_Destroy(); }
 
-        [[nodiscard]] Handle NativeHandle() const noexcept { return this->_handle; }
-        [[nodiscard]] bool Valid() const noexcept { return this->_handle != 0; }
+        [[nodiscard]] constexpr Handle NativeHandle() const noexcept { return this->_handle; }
+        [[nodiscard]] constexpr bool   Valid()        const noexcept { return this->_handle != 0; }
     };
 
 } // namespace xgl::internal

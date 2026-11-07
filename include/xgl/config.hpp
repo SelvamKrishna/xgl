@@ -1,6 +1,7 @@
 #pragma once
 
-#include <zen/log.hpp>
+#include <zen/log/core.hpp>
+#include <zen/log/debug.hpp>
 
 #include <cstdint>
 #include <format>
@@ -24,7 +25,7 @@ namespace xgl::config {
         }
     };
 
-    inline constexpr Version  VERSION  { 0, 1 }; // `xgl` Version
+    inline constexpr Version  VERSION  { 0, 2 }; // `xgl` Version
     inline const zen::log_tag XGL_TAG { "XGL", zen::ansi_color::MAGENTA };
     inline const zen::log_tag GLFW_TAG { "GLFW", zen::ansi_color::MAGENTA, &XGL_TAG };
 
@@ -36,5 +37,12 @@ template <> struct std::formatter<xgl::config::Version> {
     auto format(const xgl::config::Version& type, std::format_context& ctx) const
     {
         return std::format_to(ctx.out(), "{}.{}", type.major, type.minor);
+    }
+};
+
+template<> struct zen::dbg_trait<xgl::config::Version> {
+    static void debug(const xgl::config::Version& version) noexcept
+    {
+        std::cout << "Version(" << version.major << "." << version.minor << ")";
     }
 };

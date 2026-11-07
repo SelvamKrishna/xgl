@@ -10,37 +10,39 @@ namespace xgl {
         this->Adopt(handle);
     }
 
-    void VertexArray::SetVertexBuffer(const VertexBuffer& vbo, std::span<const VertexAttrib> attribs)
+    void VertexArray::SetVertexBuffer(VertexBuffer vbo, std::span<const VertexAttrib> attribs)
     {
         this->RequireContext();
+        this->_vbo = std::move(vbo);
+
         glBindVertexArray(this->_handle);
+            this->_vbo->Bind();
 
-        vbo.Bind();
+            for (const auto& ATTRIB : attribs)
+            {
+                glEnableVertexAttribArray(ATTRIB.location);
+                glVertexAttribPointer(
+                    ATTRIB.location,
+                    ATTRIB.components,
+                    ATTRIB.type,
+                    ATTRIB.normalized,
+                    ATTRIB.stride,
+                    reinterpret_cast<const void*>(ATTRIB.offset)
+                );
+            }
 
-        for (const auto& ATTRIB : attribs)
-        {
-            glEnableVertexAttribArray(ATTRIB.location);
-            glVertexAttribPointer(
-                ATTRIB.location,
-                ATTRIB.components,
-                ATTRIB.type,
-                ATTRIB.normalized,
-                ATTRIB.stride,
-                reinterpret_cast<const void*>(ATTRIB.offset)
-            );
-        }
-
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    void VertexArray::SetIndexBuffer(const IndexBuffer& ibo)
+    void VertexArray::SetIndexBuffer(IndexBuffer ibo)
     {
         this->RequireContext();
+        this->_ibo = std::move(ibo);
+
         glBindVertexArray(this->_handle);
-            ibo.Bind();
+            this->_ibo->Bind();
         glBindVertexArray(0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     void VertexArray::Bind() const noexcept { glBindVertexArray(this->_handle); }

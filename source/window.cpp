@@ -12,7 +12,7 @@ namespace xgl {
 
         GLFWwindow* CreateNativeWindow(const Window::Config& config)
         {
-            zen::log_process process { "Create Native Window" , &config::XGL_TAG };
+            zen::log_process process { "Create Native Window", &config::XGL_TAG };
 
             GLFWwindow* windowPtr {
                 glfwCreateWindow(
@@ -25,15 +25,15 @@ namespace xgl {
             };
 
             if (!windowPtr) process.log_failure("Failed to create GLFW window");
-            glfwSwapInterval(config.vsync ? 1 : 0);
             return windowPtr;
         }
 
     }
 
     Window::Window(const Config& config)
-        : _windowPtr  { CreateNativeWindow(config) }
-        , _contextPtr { std::make_shared<ContextState>() }
+        : _windowPtr    { CreateNativeWindow(config) }
+        , _contextPtr   { std::make_shared<ContextState>() }
+        , _vsyncEnabled { config.vsync }
     {
         this->_contextPtr->window = this->_windowPtr;
         this->_contextPtr->alive  = true;
@@ -47,13 +47,13 @@ namespace xgl {
         if (this->_windowPtr)
             glfwDestroyWindow(this->_windowPtr);
 
-        this->_windowPtr  = nullptr;
+        this->_windowPtr = nullptr;
         this->_contextPtr.reset();
     }
 
     Window::Window(Window&& other) noexcept
-        : _windowPtr(std::exchange(other._windowPtr, nullptr))
-        , _contextPtr(std::move(other._contextPtr))
+        : _windowPtr  { std::exchange(other._windowPtr, nullptr) }
+        , _contextPtr { std::move(other._contextPtr) }
     {}
 
     Window& Window::operator=(Window&& other) noexcept
@@ -69,15 +69,16 @@ namespace xgl {
             this->_windowPtr  = std::exchange(other._windowPtr, nullptr);
             this->_contextPtr = std::move(other._contextPtr);
         }
-
         return *this;
     }
 
     void Window::MakeCurrent()
     {
-        zen::log_process process { "Make Current Context" , &config::XGL_TAG };
+        zen::log_process process { "Make Current Context", &config::XGL_TAG };
         process.log_panic_if(this->_windowPtr == nullptr, "Window is not valid");
+
         glfwMakeContextCurrent(this->_windowPtr);
+        this->SetVSync(this->_vsyncEnabled);
     }
 
     std::pair<int32_t, int32_t> Window::FramebufferSize() const noexcept

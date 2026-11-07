@@ -6,6 +6,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <optional>
+#include <span>
+
 namespace xgl {
 
     struct VertexAttrib {
@@ -18,14 +21,18 @@ namespace xgl {
     };
 
     struct VertexArray : public internal::IGLObject<VertexArray> {
+    private:
+        std::optional<VertexBuffer> _vbo;
+        std::optional<IndexBuffer>  _ibo;
+
     public:
-        VertexArray() { this->IAllocate(); }
+        explicit VertexArray(Window::WeakContext ctx) : IGLObject { std::move(ctx) } { this->IAllocate(); }
 
         void IAllocate();
         static void IDelete(GLuint handle) noexcept { glDeleteVertexArrays(1, &handle); }
 
-        void SetVertexBuffer(const VertexBuffer& vbo, std::span<const VertexAttrib> attribs);
-        void SetIndexBuffer(const IndexBuffer& ibo);
+        void SetVertexBuffer(VertexBuffer vbo, std::span<const VertexAttrib> attribs);
+        void SetIndexBuffer(IndexBuffer ibo);
         void Bind() const noexcept;
     };
 

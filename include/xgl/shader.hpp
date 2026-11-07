@@ -5,9 +5,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <string>
-#include <unordered_map>
 #include <filesystem>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 
 namespace xgl {
 
@@ -26,21 +27,33 @@ namespace xgl {
         static std::string _ReadFile(const std::filesystem::path& path);
 
     public:
-        Shader(Shader::Kind type, std::filesystem::path sourceFile);
+        Shader(Window::WeakContext ctx, Kind type, std::filesystem::path sourceFile);
 
         void IAllocate();
         static void IDelete(Handle handle) noexcept;
 
-        [[nodiscard]] constexpr Kind Type() const noexcept { return this->_type; }
+        [[nodiscard]] Kind Type() const noexcept { return this->_type; }
     };
 
     struct ShaderProgram : public internal::IGLObject<ShaderProgram> {
     private:
-        std::unordered_map<std::string, GLint> _uniformCache; // populated lazily
+        std::unordered_map<std::string, GLint> _uniformCache;
+
+        void _Link(std::span<Shader* const> shaders);
 
     public:
-        ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader);
-        ShaderProgram(Shader&& vertexShader, Shader&& fragmentShader, Shader&& geometryShader);
+        ShaderProgram(
+            Window::WeakContext ctx,
+            Shader&& vertexShader,
+            Shader&& fragmentShader
+        );
+
+        ShaderProgram(
+            Window::WeakContext ctx,
+            Shader&& vertexShader,
+            Shader&& fragmentShader,
+            Shader&& geometryShader
+        );
 
         void IAllocate();
         static void IDelete(Handle handle) noexcept;
@@ -48,15 +61,8 @@ namespace xgl {
         void Bind() const noexcept;
         [[nodiscard]] GLint UniformLocation(std::string_view name);
 
-        void SetUniform(std::string_view name, float value) noexcept
-        {
-            glUniform1f(this->UniformLocation(name), value);
-        }
-
-        void SetUniform(std::string_view name, int value) noexcept
-        {
-            glUniform1i(this->UniformLocation(name), value);
-        }
+        void SetUniform(std::string_view name, float value) { glUniform1f(this->UniformLocation(name), value); }
+        void SetUniform(std::string_view name, int value)   { glUniform1i(this->UniformLocation(name), value); }
     };
 
 } // namespace xgl

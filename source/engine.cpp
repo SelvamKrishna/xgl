@@ -4,19 +4,18 @@
 #include <GLFW/glfw3.h>
 
 #include <zen/log/core.hpp>
+#include <zen/log/tools.hpp>
 
 #include <atomic>
+#include <stdexcept>
 
 namespace xgl::internal {
 
-    namespace {
-        std::atomic<int> gGLFWRefCount { 0 };
-    }
+    namespace { std::atomic<int> gGLFWRefCount { 0 }; }
 
     void AcquireGLFW(config::Version version)
     {
-        if (gGLFWRefCount.fetch_add(1) != 0)
-            return;
+        if (gGLFWRefCount.fetch_add(1) != 0) return;
 
         zen::log_process process { {"Acquiring GLFW {}", version}, &config::XGL_TAG };
 
@@ -44,11 +43,9 @@ namespace xgl::internal {
 
     void ReleaseGLFW()
     {
-        if (gGLFWRefCount.fetch_sub(1) != 1)
-            return;
+        if (gGLFWRefCount.fetch_sub(1) != 1) return;
 
         zen::log_process process { "Releasing GLFW", &config::XGL_TAG };
-
         glfwTerminate();
         process.log_success();
     }
@@ -62,11 +59,14 @@ namespace xgl::internal {
             "Failed to load GLAD"
         );
 
-        config::XGL_TAG.info()
-            << reinterpret_cast<const char*>(glGetString(GL_VERSION))
-            << " ("
-            << reinterpret_cast<const char*>(glGetString(GL_RENDERER))
-            << ")";
+        const GLubyte* VERSION_STR  { glGetString(GL_VERSION)  };
+        const GLubyte* RENDERER_STR { glGetString(GL_RENDERER) };
+
+        config::XGL_TAG.info() << zen::fmt_str {
+            "OpenGL {} ({})",
+            VERSION_STR  ? reinterpret_cast<const char*>(VERSION_STR)  : "<unknown>",
+            RENDERER_STR ? reinterpret_cast<const char*>(RENDERER_STR) : "<unknown>"
+        };
 
         process.log_success();
     }

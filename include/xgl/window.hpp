@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <cstdint>
@@ -22,22 +23,23 @@ namespace xgl {
         };
 
         struct ContextState {
-            GLFWwindow* window { nullptr };
-            bool        alive  { true };
+            GLFWwindow*       window { nullptr };
+            std::atomic<bool> alive  { true };
         };
 
         using WeakContext = std::weak_ptr<ContextState>;
 
     private:
-        GLFWwindow*                   _windowPtr { nullptr };
+        GLFWwindow*                   _windowPtr  { nullptr };
         std::shared_ptr<ContextState> _contextPtr;
+        bool                         _vsyncEnabled { true };
 
     public:
         explicit Window(const Config& config);
         ~Window();
 
-        constexpr Window(const Window&)            noexcept = delete;
-        constexpr Window& operator=(const Window&) noexcept = delete;
+        Window(const Window&)            = delete;
+        Window& operator=(const Window&) = delete;
 
         Window(Window&&) noexcept;
         Window& operator=(Window&&) noexcept;
@@ -51,9 +53,9 @@ namespace xgl {
             return this->_windowPtr ? glfwWindowShouldClose(this->_windowPtr) : true;
         }
 
-        void PollEvents() const noexcept { glfwPollEvents(); }
+        void PollEvents()  const noexcept { glfwPollEvents(); }
         void SwapBuffers() const noexcept { if (this->_windowPtr) glfwSwapBuffers(this->_windowPtr); }
-        void RequestClose() noexcept
+        void RequestClose()      noexcept
         {
             if (this->_windowPtr) glfwSetWindowShouldClose(this->_windowPtr, GLFW_TRUE);
         }
@@ -61,9 +63,6 @@ namespace xgl {
         void SetVSync(bool enabled) noexcept { glfwSwapInterval(enabled ? 1 : 0); }
 
         [[nodiscard]] std::pair<int32_t, int32_t> FramebufferSize() const noexcept;
-
-        // void OnFramebufferSize(std::function<void(int,int)>);
-        // void OnKey(std::function<void(int key,int scancode,int action,int mods)>);
     };
 
 } // namespace xgl
