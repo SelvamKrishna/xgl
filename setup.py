@@ -28,7 +28,7 @@ PATHS = Paths()
 
 
 def glfw_package_setup() -> None:
-    if (PATHS.build / "libglfw3.a").exists():
+    if (PATHS.build / "glfw3.dll").exists():
         return
 
     if not (PATHS.build / "glfw").exists():
@@ -41,16 +41,17 @@ def glfw_package_setup() -> None:
                 str(PATHS.build / "glfw"),
                 "-G",
                 "MinGW Makefiles",
+                "-DBUILD_SHARED_LIBS=ON",
                 "-DGLFW_BUILD_EXAMPLES=OFF",
                 "-DGLFW_BUILD_TESTS=OFF",
                 "-DGLFW_BUILD_DOCS=OFF",
             ]
         )
 
-    if not (PATHS.build / "glfw" / "src" / "libglfw3.a").exists():
+    if not (PATHS.build / "glfw" / "src" / "glfw3.dll").exists():
         pycraft.run_cmd(f"make -C {PATHS.build / 'glfw'}")
 
-    pycraft.copy_path(PATHS.build / 'glfw' / "src" / "libglfw3.a", PATHS.build / "libglfw3.a")
+    pycraft.copy_path(PATHS.build / 'glfw' / "src" / "glfw3.dll", PATHS.build / "glfw3.dll")
 
 def glad_package_setup() -> None:
     output_c = PATHS.source / "glad.c"

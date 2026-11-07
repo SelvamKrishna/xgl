@@ -8,7 +8,7 @@
 
 namespace xgl::config {
 
-    struct Version final {
+    struct Version {
     public:
         uint8_t major; uint8_t minor;
 
@@ -24,13 +24,14 @@ namespace xgl::config {
         }
     };
 
-    inline constexpr Version  VERSION  { 0, 1 };
+    inline constexpr Version  VERSION  { 0, 1 }; // `xgl` Version
     inline const zen::log_tag XGL_TAG { "XGL", zen::ansi_color::MAGENTA };
 
 } // namespace xgl::config
 
 template <> struct std::formatter<xgl::config::Version> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+
     auto format(const xgl::config::Version& type, std::format_context& ctx) const
     {
         return std::format_to(ctx.out(), "{}.{}", type.major, type.minor);

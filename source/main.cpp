@@ -1,10 +1,6 @@
-#include "core/engine.hpp"
-#include "core/window.hpp"
+#include <xgl/xgl.hpp>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
+#include <zen/log.hpp>
 
 const char* VS_SRC {
     "#version 330 core\n"
@@ -24,43 +20,15 @@ const char* FS_SRC {
     "}\n"
 };
 
-using namespace xgl;
-using namespace xgl::core;
-using namespace xgl::config;
-
-void _FramebufferSizeCallback(GLFWwindow* _, int width, int height) { glViewport(0, 0, width, height); }
-
-int main()
-{
+int main() {
     zen::logger::init();
-    Engine::Init(Version {4, 6});
+    xgl::EngineGuard engine { {4, 6} };
+    xgl::Window win { {.title = "Hello", .width = 1280, .height = 720} };
 
-    Window window {WindowBuilder{}.WithTitle("Hello").Build()};
-
-    glfwMakeContextCurrent(window.GetWindowPtr());
-    glfwSetFramebufferSizeCallback(window.GetWindowPtr(), _FramebufferSizeCallback);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cerr << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
-    GLuint vertexShader {glCreateShader(GL_VERTEX_SHADER)};
-    glShaderSource(vertexShader, 1, &VS_SRC, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragmentShader {glCreateShader(GL_FRAGMENT_SHADER)};
-    glShaderSource(fragmentShader, 1, &FS_SRC, NULL);
-    glCompileShader(fragmentShader);
-
-    GLuint shaderProgram {glCreateProgram()};
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    xgl::ShaderProgram program {
+        xgl::Shader{xgl::ShaderType::Vertex,   VS_SRC},
+        xgl::Shader{xgl::ShaderType::Fragment, FS_SRC},
+    };
 
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,
@@ -68,38 +36,22 @@ int main()
          0.0f,  0.5f, 0.0f
     };
 
-    GLuint VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
+    xgl::VertexArray vao;
+    vao.SetVertexBuffer(
+        xgl::VertexBuffer { vertices, sizeof(vertices) },
+        std::array { xgl::VertexAttrib{0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0} }
+    );
 
-    glBindVertexArray(VAO);
+    while (!win.ShouldClose()) {
+        win.PollEvents();
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    while (!glfwWindowShouldClose(window.GetWindowPtr()))
-    {
-        glClearColor(0.1, 0.1, 0.1, 1.0);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
+        program.Bind();
+        vao.Bind();
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glfwSwapBuffers(window.GetWindowPtr());
-        glfwPollEvents();
+        win.SwapBuffers();
     }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shaderProgram);
-
-    glfwTerminate();
-    return 0;
 }
